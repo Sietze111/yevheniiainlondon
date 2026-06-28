@@ -5,7 +5,16 @@ import { ProgressBar } from "./components/ProgressBar";
 import { StopList } from "./components/StopList";
 import { LondonMap } from "./components/Map";
 import { COLORS } from "./components/StampSvg";
-import { Map as MapIcon, List as ListIcon } from "lucide-react";
+import { Map as MapIcon, List as ListIcon, Download } from "lucide-react";
+
+interface BeforeInstallPromptEvent extends Event {
+  readonly platforms: string[];
+  readonly userChoice: Promise<{
+    outcome: "accepted" | "dismissed";
+    platform: string;
+  }>;
+  prompt(): Promise<void>;
+}
 
 const STORAGE_KEY = "visitedStops";
 
@@ -14,6 +23,25 @@ function App() {
   const [activeCategory, setActiveCategory] = useState<string>("all");
   const [selectedStop, setSelectedStop] = useState<Stop | null>(null);
   const [mobileView, setMobileView] = useState<"map" | "list">("map");
+  const [deferredPrompt, setDeferredPrompt] = useState<BeforeInstallPromptEvent | null>(null);
+
+  // Listen to beforeinstallprompt event for PWA installation
+  useEffect(() => {
+    const handler = (e: Event) => {
+      e.preventDefault();
+      setDeferredPrompt(e as BeforeInstallPromptEvent);
+    };
+    window.addEventListener("beforeinstallprompt", handler);
+    return () => window.removeEventListener("beforeinstallprompt", handler);
+  }, []);
+
+  const handleInstallClick = async () => {
+    if (!deferredPrompt) return;
+    await deferredPrompt.prompt();
+    const { outcome } = await deferredPrompt.userChoice;
+    console.log(`User response to install prompt: ${outcome}`);
+    setDeferredPrompt(null);
+  };
 
   // Load visited from localStorage on mount
   useEffect(() => {
@@ -60,12 +88,25 @@ function App() {
       {/* Header / Masthead */}
       <header className="px-5 py-6 md:px-8 md:py-7 bg-[#F3ECD9] border-b-2 border-[#1B2A4A] relative">
         <div className="max-w-7xl mx-auto">
-          <p className="font-mono text-[10px] md:text-xs tracking-[0.14em] uppercase text-[#B6332B] font-semibold mb-1.5">
-            A Self-Guided Walking &amp; Wonder Map · 10 Days in London
-          </p>
-          <h1 className="font-serif text-3xl md:text-4xl font-extrabold tracking-tight mb-2">
-            Yevheniia's London Passport
-          </h1>
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-3">
+            <div>
+              <p className="font-mono text-[10px] md:text-xs tracking-[0.14em] uppercase text-[#B6332B] font-semibold mb-1.5">
+                A Self-Guided Walking &amp; Wonder Map · 10 Days in London
+              </p>
+              <h1 className="font-serif text-3xl md:text-4xl font-extrabold tracking-tight">
+                Yevheniia's London Passport
+              </h1>
+            </div>
+            {deferredPrompt && (
+              <button
+                onClick={handleInstallClick}
+                className="bg-[#B6332B] text-white border-[1.5px] border-[#B6332B] hover:bg-[#FBF6E9] hover:text-[#B6332B] rounded-full px-5 py-2 font-mono text-[11px] tracking-wider transition-all duration-150 flex items-center gap-2 font-bold shadow-sm hover:-translate-y-0.5 cursor-pointer self-start"
+              >
+                <Download size={14} />
+                Install Passport App
+              </button>
+            )}
+          </div>
           <p className="max-w-2xl text-sm md:text-[15px] leading-relaxed text-[#46506b] mb-5">
             First time in London, first ten days to fill. Twenty-six stops, stamped and sorted into four kinds of wonder: the Wizarding World, the Page &amp; Screen spots, the unmissable Icons, and the Hidden Gems most visitors walk straight past.
           </p>
