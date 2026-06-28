@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import type { Stop } from "./components/StopList";
 import { STOPS } from "./data/stops";
+import confetti from "canvas-confetti";
 import { ProgressBar } from "./components/ProgressBar";
 import { StopList } from "./components/StopList";
 import { LondonMap } from "./components/Map";
@@ -71,6 +72,13 @@ function App() {
       newVisited.delete(id);
     } else {
       newVisited.add(id);
+      // Trigger confetti!
+      confetti({
+        particleCount: 100,
+        spread: 70,
+        origin: { y: 0.8 },
+        colors: ["#A8842C", "#B6332B", "#3E5C3A", "#6B4E71", "#1B2A4A"]
+      });
     }
     setVisited(newVisited);
     saveVisited(newVisited);
