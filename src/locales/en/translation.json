@@ -1,0 +1,33 @@
+{
+  "title": "Yevheniia & Olena's Bern Passport",
+  "subtitle": "A Self-Guided Walking & Wonder Map · Hidden gems of Bern",
+  "description": "Explore Bern and all its hidden gems with this self-guided walking map. Tap a stamp on the map, or pick a stop from the list below to fly straight to it. Tap the circle next to a name to mark it visited as you go.",
+
+  "install": "Install Passport App",
+
+  "categories": {
+    "all": "All Stops",
+    "history": "Historic",
+    "nature": "Nature",
+    "culture": "Culture",
+    "water": "Water",
+    "viewpoint": "Viewpoints"
+  },
+
+  "howToTitle": "How to use:",
+  "howTo": "Tap a stamp on the map, or pick a stop from the list below to fly straight to it. Tap the circle next to a name to mark it visited as you go.",
+
+  "mobile": {
+    "map": "Map View",
+    "list": "Stops List"
+  },
+
+  "footer": {
+    "tiles": "Map data & tiles © OpenStreetMap contributors",
+    "built": "Stamps are hand-drawn vector illustrations · Built with React & Tailwind"
+  },
+  "progress": {
+    "title": "Passport Progress",
+    "count": "{{visited}} / {{total}} locations visited"
+  }
+}

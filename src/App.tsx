@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useTranslation } from "react-i18next";
 import type { Stop } from "./components/StopList";
 import { STOPS } from "./data/stops";
 import confetti from "canvas-confetti";
@@ -6,40 +7,26 @@ import { ProgressBar } from "./components/ProgressBar";
 import { StopList } from "./components/StopList";
 import { BernMap } from "./components/Map";
 import { COLORS } from "./components/StampSvg";
+import { LanguagePicker } from "./components/LanguagePicker";
 import { Map as MapIcon, List as ListIcon, Download } from "lucide-react";
 
-const CATEGORY_CONFIG = [
-  {
-    id: "all",
-    label: "All Stops",
-    color: "#1B2A4A",
-  },
-  {
-    id: "history",
-    label: "Historic",
-    color: "#A8842C",
-  },
-  {
-    id: "nature",
-    label: "Nature",
-    color: "#3E7C59",
-  },
-  {
-    id: "culture",
-    label: "Culture",
-    color: "#8E44AD",
-  },
-  {
-    id: "water",
-    label: "Water",
-    color: "#2E86C1",
-  },
-  {
-    id: "viewpoint",
-    label: "Viewpoints",
-    color: "#E67E22",
-  },
+const CATEGORY_IDS = [
+  "all",
+  "history",
+  "nature",
+  "culture",
+  "water",
+  "viewpoint",
 ] as const;
+
+const CATEGORY_COLORS: Record<(typeof CATEGORY_IDS)[number], string> = {
+  all: "#1B2A4A",
+  history: "#A8842C",
+  nature: "#3E7C59",
+  culture: "#8E44AD",
+  water: "#2E86C1",
+  viewpoint: "#E67E22",
+};
 
 interface BeforeInstallPromptEvent extends Event {
   readonly platforms: string[];
@@ -53,6 +40,7 @@ interface BeforeInstallPromptEvent extends Event {
 const STORAGE_KEY = "visitedStops";
 
 function App() {
+  const { t } = useTranslation();
   const [visited, setVisited] = useState<Set<string>>(new Set());
   const [activeCategory, setActiveCategory] = useState<string>("all");
   const [selectedStop, setSelectedStop] = useState<Stop | null>(null);
@@ -133,42 +121,43 @@ function App() {
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-3">
             <div>
               <p className="font-mono text-[10px] md:text-xs tracking-[0.14em] uppercase text-[#B6332B] font-semibold mb-1.5">
-                A Self-Guided Walking &amp; Wonder Map · Hidden gems of Bern
+                {t("subtitle")}
               </p>
               <h1 className="font-serif text-3xl md:text-4xl font-extrabold tracking-tight">
-                Yevheniia & Olena's Bern Passport
+                {t("title")}
               </h1>
             </div>
-            {deferredPrompt && (
-              <button
-                onClick={handleInstallClick}
-                className="bg-[#B6332B] text-white border-[1.5px] border-[#B6332B] hover:bg-[#FBF6E9] hover:text-[#B6332B] rounded-full px-5 py-2 font-mono text-[11px] tracking-wider transition-all duration-150 flex items-center gap-2 font-bold shadow-sm hover:-translate-y-0.5 cursor-pointer self-start"
-              >
-                <Download size={14} />
-                Install Passport App
-              </button>
-            )}
+            <div className="flex items-center gap-3 self-start">
+              <LanguagePicker />
+              {deferredPrompt && (
+                <button
+                  onClick={handleInstallClick}
+                  className="bg-[#B6332B] text-white border-[1.5px] border-[#B6332B] hover:bg-[#FBF6E9] hover:text-[#B6332B] rounded-full px-5 py-2 font-mono text-[11px] tracking-wider transition-all duration-150 flex items-center gap-2 font-bold shadow-sm hover:-translate-y-0.5 cursor-pointer"
+                >
+                  <Download size={14} />
+                  {t("install")}
+                </button>
+              )}
+            </div>
           </div>
           <p className="max-w-2xl text-sm md:text-[15px] leading-relaxed text-[#46506b] mb-5">
-            Explore Bern and all it's hidden gems with this self-guided walking
-            map. Tap a stamp on the map, or pick a stop from the list below to
-            fly straight to it. Tap the circle next to a name to mark it visited
-            as you go.
+            {t("description")}
           </p>
 
           {/* Filter Chips */}
           <div className="flex gap-2.5 flex-wrap">
-            {CATEGORY_CONFIG.map((category) => {
-              const active = activeCategory === category.id;
+            {CATEGORY_IDS.map((categoryId) => {
+              const active = activeCategory === categoryId;
+              const color = CATEGORY_COLORS[categoryId];
 
               return (
                 <button
-                  key={category.id}
-                  onClick={() => setActiveCategory(category.id)}
+                  key={categoryId}
+                  onClick={() => setActiveCategory(categoryId)}
                   className="border-[1.5px] rounded-full px-4 py-1.5 font-mono text-[11px] tracking-wider transition-all duration-150 flex items-center gap-2 hover:-translate-y-0.5"
                   style={{
-                    borderColor: active ? category.color : "#1B2A4A",
-                    backgroundColor: active ? category.color : "#FBF6E9",
+                    borderColor: active ? color : "#1B2A4A",
+                    backgroundColor: active ? color : "#FBF6E9",
                     color: active ? "#fff" : "#1B2A4A",
                   }}
                 >
@@ -177,12 +166,12 @@ function App() {
                     style={{
                       backgroundColor: active
                         ? "#fff"
-                        : category.id === "all"
+                        : categoryId === "all"
                           ? "#1B2A4A"
-                          : COLORS[category.id as keyof typeof COLORS],
+                          : COLORS[categoryId as keyof typeof COLORS],
                     }}
                   />
-                  {category.label}
+                  {t(`categories.${categoryId}`)}
                 </button>
               );
             })}
@@ -203,10 +192,8 @@ function App() {
         >
           <div className="overflow-y-auto flex-1 px-4 py-5 md:px-6 md:py-5 max-h-[calc(100vh-220px)] md:max-h-[calc(100vh-188px)] space-y-4">
             <div className="text-[13px] leading-relaxed text-[#46506b] bg-[#FBF6E9] border border-[#D8C9A0] rounded-xl p-3.5 shadow-sm">
-              <strong className="text-[#1B2A4A]">How to use:</strong> tap a
-              stamp on the map, or pick a stop from the list below to fly
-              straight to it. Tap the circle next to a name to mark it visited
-              as you go.
+              <strong className="text-[#1B2A4A]">{t("howToTitle")}</strong>{" "}
+              {t("howTo")}
             </div>
 
             <ProgressBar
@@ -251,7 +238,7 @@ function App() {
             }`}
           >
             <MapIcon size={14} />
-            Map View
+            {t("mobile.map")}
           </button>
           <button
             onClick={() => setMobileView("list")}
@@ -262,29 +249,15 @@ function App() {
             }`}
           >
             <ListIcon size={14} />
-            Stops List
+            {t("mobile.list")}
           </button>
         </div>
       </div>
 
       {/* Footer */}
       <footer className="font-mono text-[10px] text-[#46506b] px-5 py-4 md:px-8 border-t border-[#D8C9A0] bg-[#F3ECD9] z-10 flex flex-col md:flex-row md:justify-between gap-2">
-        <div>
-          Map data &amp; tiles &copy;{" "}
-          <a
-            href="https://www.openstreetmap.org/copyright"
-            target="_blank"
-            rel="noreferrer"
-            className="underline"
-          >
-            OpenStreetMap
-          </a>{" "}
-          contributors
-        </div>
-        <div>
-          Stamps are hand-drawn vector illustrations · Built with React &amp;
-          Tailwind
-        </div>
+        <div>{t("footer.tiles")}</div>
+        <div>{t("footer.built")}</div>
       </footer>
     </div>
   );
