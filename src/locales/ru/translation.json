@@ -30,6 +30,9 @@
     "title": "Прогресс паспорта",
     "count": "Посещено мест: {{visited}} / {{total}}"
   },
+  "popup": {
+    "goodToKnow": "Полезно знать"
+  },
   "stops": {
     "rosengarten": {
       "name": "Розенгартен",

@@ -30,6 +30,9 @@
     "title": "Passport Progress",
     "count": "{{visited}} / {{total}} locations visited"
   },
+  "popup": {
+    "goodToKnow": "Good to know"
+  },
   "stops": {
     "rosengarten": {
       "name": "Rosengarten",
