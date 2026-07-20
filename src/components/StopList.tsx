@@ -1,16 +1,14 @@
 import React from "react";
-import { StampSvg, COLORS, CAT_LABEL } from "./StampSvg";
+import { useTranslation } from "react-i18next";
+import { StampSvg, COLORS } from "./StampSvg";
 
 export interface Stop {
   id: string;
-  name: string;
   area: string;
   cat: "history" | "nature" | "region" | "water" | "culture" | "viewpoint";
   lat: number;
   lng: number;
   glyph: string;
-  blurb: string;
-  tip: string;
 }
 
 interface StopListProps {
@@ -29,6 +27,7 @@ const CAT_ORDER: Array<Stop["cat"]> = [
   "culture",
   "viewpoint",
 ];
+
 export const StopList: React.FC<StopListProps> = ({
   stops,
   visited,
@@ -36,12 +35,12 @@ export const StopList: React.FC<StopListProps> = ({
   onStopClick,
   activeCategory,
 }) => {
+  const { t } = useTranslation();
+
   return (
     <div className="space-y-4">
       {CAT_ORDER.map((cat) => {
-        // Filter stops in this category
         const catStops = stops.filter((s) => s.cat === cat);
-        // If active category is not "all" and not this category, hide the whole section
         if (activeCategory !== "all" && activeCategory !== cat) {
           return null;
         }
@@ -53,7 +52,7 @@ export const StopList: React.FC<StopListProps> = ({
                 className="w-2.5 h-2.5 rounded-full"
                 style={{ backgroundColor: COLORS[cat] }}
               />
-              {CAT_LABEL[cat]}
+              {t(`categories.${cat}`)}
             </div>
 
             <div className="space-y-1">
@@ -66,19 +65,17 @@ export const StopList: React.FC<StopListProps> = ({
                     onClick={() => onStopClick(stop)}
                     className="flex gap-3.5 items-start p-2 rounded-lg cursor-pointer hover:bg-[#FBF6E9] transition-colors"
                   >
-                    {/* Mini Stamp */}
                     <div className="w-8 h-8 flex-shrink-0">
                       <StampSvg cat={stop.cat} glyph={stop.glyph} size={32} />
                     </div>
 
-                    {/* Text Details */}
                     <div className="flex-1 min-w-0">
                       <p
                         className={`font-serif font-bold text-[15px] leading-tight text-[#1B2A4A] ${
                           isVisited ? "opacity-40 line-through" : ""
                         }`}
                       >
-                        {stop.name}
+                        {t(`stops.${stop.id}.name`)}
                       </p>
                       <p
                         className={`text-[12px] text-[#46506b] ${
@@ -89,10 +86,9 @@ export const StopList: React.FC<StopListProps> = ({
                       </p>
                     </div>
 
-                    {/* Checkbox */}
                     <button
                       type="button"
-                      title="Mark visited"
+                      title={t("stopList.markVisited")}
                       onClick={(e) => onToggleVisited(stop.id, e)}
                       className={`w-[19px] h-[19px] rounded-full border border-[#1B2A4A] flex-shrink-0 mt-0.5 flex items-center justify-center transition-all ${
                         isVisited ? "bg-[#1B2A4A]" : "hover:bg-[#1B2A4A]/5"

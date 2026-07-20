@@ -1,8 +1,10 @@
 import React, { useEffect, useRef } from "react";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
+import { useTranslation } from "react-i18next";
+import i18n from "i18next";
 import type { Stop } from "./StopList";
-import { StampSvg, COLORS, CAT_LABEL } from "./StampSvg";
+import { StampSvg, COLORS } from "./StampSvg";
 import { renderToString } from "react-dom/server";
 
 interface MapProps {
@@ -18,6 +20,7 @@ export const BernMap: React.FC<MapProps> = ({
   selectedStop,
   onClearSelectedStop,
 }) => {
+  const { t } = useTranslation();
   const mapContainerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<L.Map | null>(null);
   const markersRef = useRef<globalThis.Map<string, L.Marker>>(
@@ -28,7 +31,6 @@ export const BernMap: React.FC<MapProps> = ({
   useEffect(() => {
     if (!mapContainerRef.current) return;
 
-    // Create Leaflet map instance
     const mapInstance = L.map(mapContainerRef.current, {
       scrollWheelZoom: true,
     }).setView([46.95421326794626, 7.4741547239042605], 13);
@@ -52,23 +54,18 @@ export const BernMap: React.FC<MapProps> = ({
     const mapInstance = mapRef.current;
     if (!mapInstance) return;
 
-    // Clear existing markers
     markersRef.current.forEach((marker) => {
       mapInstance.removeLayer(marker);
     });
     markersRef.current.clear();
 
-    // Recreate markers based on current category filter
     stops.forEach((stop, index) => {
-      // Check category filter
       const show = activeCategory === "all" || stop.cat === activeCategory;
       if (!show) return;
 
-      // Add rotation logic from original HTML
       const rotIcon = ((index * 37) % 13) - 6;
       const rotPopup = ((index * 53) % 9) - 4;
 
-      // Render React component to static HTML string
       const stampHtml = renderToString(
         <div style={{ transform: `rotate(${rotIcon}deg)` }}>
           <StampSvg cat={stop.cat} glyph={stop.glyph} size={40} />
@@ -91,7 +88,7 @@ export const BernMap: React.FC<MapProps> = ({
             </div>
             <div>
               <p className="popup-title font-serif font-extrabold text-[16px] leading-tight text-[#1B2A4A]">
-                {stop.name}
+                {i18n.t(`stops.${stop.id}.name`)}
               </p>
               <span
                 className="popup-badge font-mono text-[9px] uppercase tracking-wider px-2 py-0.5 rounded-full inline-block mt-1"
@@ -101,18 +98,18 @@ export const BernMap: React.FC<MapProps> = ({
                   border: `1px solid ${COLORS[stop.cat]}77`,
                 }}
               >
-                {CAT_LABEL[stop.cat]}
+                {i18n.t(`categories.${stop.cat}`)}
               </span>
             </div>
           </div>
           <p className="popup-blurb text-[13.5px] leading-relaxed text-[#1B2A4A] mb-1">
-            {stop.blurb}
+            {i18n.t(`stops.${stop.id}.blurb`)}
           </p>
           <div className="popup-tip text-[12.5px] leading-relaxed bg-[#1B2A4A]/5 border-l-4 border-[#1B2A4A] p-2.5 rounded mt-2 text-[#46506b]">
             <b className="font-mono text-[10px] uppercase tracking-wider text-[#1B2A4A] block mb-0.5">
-              Good to know
+              {i18n.t("popup.goodToKnow")}
             </b>
-            {stop.tip}
+            {i18n.t(`stops.${stop.id}.tip`)}
           </div>
         </div>,
       );
@@ -124,19 +121,18 @@ export const BernMap: React.FC<MapProps> = ({
 
       markersRef.current.set(stop.id, marker);
     });
-  }, [stops, activeCategory]);
+    // re-run when language changes so popups (rendered as static HTML) update too
+  }, [stops, activeCategory, t, i18n.resolvedLanguage]);
 
   // Handle flying to selected stop
   useEffect(() => {
     const mapInstance = mapRef.current;
     if (!mapInstance || !selectedStop) return;
 
-    // Fly to coordinates
     mapInstance.flyTo([selectedStop.lat, selectedStop.lng], 15, {
       duration: 0.8,
     });
 
-    // Find marker and open popup
     const marker = markersRef.current.get(selectedStop.id);
     if (marker) {
       setTimeout(() => {
