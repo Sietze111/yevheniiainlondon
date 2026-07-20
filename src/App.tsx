@@ -4,9 +4,42 @@ import { STOPS } from "./data/stops";
 import confetti from "canvas-confetti";
 import { ProgressBar } from "./components/ProgressBar";
 import { StopList } from "./components/StopList";
-import { LondonMap } from "./components/Map";
+import { BernMap } from "./components/Map";
 import { COLORS } from "./components/StampSvg";
 import { Map as MapIcon, List as ListIcon, Download } from "lucide-react";
+
+const CATEGORY_CONFIG = [
+  {
+    id: "all",
+    label: "All Stops",
+    color: "#1B2A4A",
+  },
+  {
+    id: "history",
+    label: "Historic",
+    color: "#A8842C",
+  },
+  {
+    id: "nature",
+    label: "Nature",
+    color: "#3E7C59",
+  },
+  {
+    id: "culture",
+    label: "Culture",
+    color: "#8E44AD",
+  },
+  {
+    id: "water",
+    label: "Water",
+    color: "#2E86C1",
+  },
+  {
+    id: "viewpoint",
+    label: "Viewpoints",
+    color: "#E67E22",
+  },
+] as const;
 
 interface BeforeInstallPromptEvent extends Event {
   readonly platforms: string[];
@@ -24,7 +57,8 @@ function App() {
   const [activeCategory, setActiveCategory] = useState<string>("all");
   const [selectedStop, setSelectedStop] = useState<Stop | null>(null);
   const [mobileView, setMobileView] = useState<"map" | "list">("map");
-  const [deferredPrompt, setDeferredPrompt] = useState<BeforeInstallPromptEvent | null>(null);
+  const [deferredPrompt, setDeferredPrompt] =
+    useState<BeforeInstallPromptEvent | null>(null);
 
   // Listen to beforeinstallprompt event for PWA installation
   useEffect(() => {
@@ -77,7 +111,7 @@ function App() {
         particleCount: 100,
         spread: 70,
         origin: { y: 0.8 },
-        colors: ["#A8842C", "#B6332B", "#3E5C3A", "#6B4E71", "#1B2A4A"]
+        colors: ["#A8842C", "#B6332B", "#3E5C3A", "#6B4E71", "#1B2A4A"],
       });
     }
     setVisited(newVisited);
@@ -99,10 +133,10 @@ function App() {
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-3">
             <div>
               <p className="font-mono text-[10px] md:text-xs tracking-[0.14em] uppercase text-[#B6332B] font-semibold mb-1.5">
-                A Self-Guided Walking &amp; Wonder Map · 10 Days in London
+                A Self-Guided Walking &amp; Wonder Map · Hidden gems of Bern
               </p>
               <h1 className="font-serif text-3xl md:text-4xl font-extrabold tracking-tight">
-                Yevheniia's London Passport
+                Yevheniia & Olena's Bern Passport
               </h1>
             </div>
             {deferredPrompt && (
@@ -116,78 +150,42 @@ function App() {
             )}
           </div>
           <p className="max-w-2xl text-sm md:text-[15px] leading-relaxed text-[#46506b] mb-5">
-            First time in London, first ten days to fill. Twenty-six stops, stamped and sorted into four kinds of wonder: the Wizarding World, the Page &amp; Screen spots, the unmissable Icons, and the Hidden Gems most visitors walk straight past.
+            Explore Bern and all it's hidden gems with this self-guided walking
+            map. Tap a stamp on the map, or pick a stop from the list below to
+            fly straight to it. Tap the circle next to a name to mark it visited
+            as you go.
           </p>
 
           {/* Filter Chips */}
           <div className="flex gap-2.5 flex-wrap">
-            <button
-              onClick={() => setActiveCategory("all")}
-              className={`border-[1.5px] border-[#1B2A4A] rounded-full px-4 py-1.5 font-mono text-[11px] tracking-wider transition-all duration-150 flex items-center gap-2 ${
-                activeCategory === "all"
-                  ? "bg-[#1B2A4A] text-white"
-                  : "bg-[#FBF6E9] hover:-translate-y-0.5"
-              }`}
-            >
-              <span className="w-2 h-2 rounded-full bg-current" />
-              All Stamps
-            </button>
-            <button
-              onClick={() => setActiveCategory("magic")}
-              className={`border-[1.5px] border-[#1B2A4A] rounded-full px-4 py-1.5 font-mono text-[11px] tracking-wider transition-all duration-150 flex items-center gap-2 ${
-                activeCategory === "magic"
-                  ? "bg-[#A8842C] text-white border-[#A8842C]"
-                  : "bg-[#FBF6E9] hover:-translate-y-0.5"
-              }`}
-            >
-              <span
-                className="w-2 h-2 rounded-full"
-                style={{ backgroundColor: activeCategory === "magic" ? "#fff" : COLORS.magic }}
-              />
-              Wizarding World
-            </button>
-            <button
-              onClick={() => setActiveCategory("lit")}
-              className={`border-[1.5px] border-[#1B2A4A] rounded-full px-4 py-1.5 font-mono text-[11px] tracking-wider transition-all duration-150 flex items-center gap-2 ${
-                activeCategory === "lit"
-                  ? "bg-[#6B4E71] text-white border-[#6B4E71]"
-                  : "bg-[#FBF6E9] hover:-translate-y-0.5"
-              }`}
-            >
-              <span
-                className="w-2 h-2 rounded-full"
-                style={{ backgroundColor: activeCategory === "lit" ? "#fff" : COLORS.lit }}
-              />
-              Page &amp; Screen
-            </button>
-            <button
-              onClick={() => setActiveCategory("classic")}
-              className={`border-[1.5px] border-[#1B2A4A] rounded-full px-4 py-1.5 font-mono text-[11px] tracking-wider transition-all duration-150 flex items-center gap-2 ${
-                activeCategory === "classic"
-                  ? "bg-[#B6332B] text-white border-[#B6332B]"
-                  : "bg-[#FBF6E9] hover:-translate-y-0.5"
-              }`}
-            >
-              <span
-                className="w-2 h-2 rounded-full"
-                style={{ backgroundColor: activeCategory === "classic" ? "#fff" : COLORS.classic }}
-              />
-              London Icons
-            </button>
-            <button
-              onClick={() => setActiveCategory("gem")}
-              className={`border-[1.5px] border-[#1B2A4A] rounded-full px-4 py-1.5 font-mono text-[11px] tracking-wider transition-all duration-150 flex items-center gap-2 ${
-                activeCategory === "gem"
-                  ? "bg-[#3E5C3A] text-white border-[#3E5C3A]"
-                  : "bg-[#FBF6E9] hover:-translate-y-0.5"
-              }`}
-            >
-              <span
-                className="w-2 h-2 rounded-full"
-                style={{ backgroundColor: activeCategory === "gem" ? "#fff" : COLORS.gem }}
-              />
-              Hidden Gems
-            </button>
+            {CATEGORY_CONFIG.map((category) => {
+              const active = activeCategory === category.id;
+
+              return (
+                <button
+                  key={category.id}
+                  onClick={() => setActiveCategory(category.id)}
+                  className="border-[1.5px] rounded-full px-4 py-1.5 font-mono text-[11px] tracking-wider transition-all duration-150 flex items-center gap-2 hover:-translate-y-0.5"
+                  style={{
+                    borderColor: active ? category.color : "#1B2A4A",
+                    backgroundColor: active ? category.color : "#FBF6E9",
+                    color: active ? "#fff" : "#1B2A4A",
+                  }}
+                >
+                  <span
+                    className="w-2 h-2 rounded-full"
+                    style={{
+                      backgroundColor: active
+                        ? "#fff"
+                        : category.id === "all"
+                          ? "#1B2A4A"
+                          : COLORS[category.id as keyof typeof COLORS],
+                    }}
+                  />
+                  {category.label}
+                </button>
+              );
+            })}
           </div>
         </div>
 
@@ -205,10 +203,16 @@ function App() {
         >
           <div className="overflow-y-auto flex-1 px-4 py-5 md:px-6 md:py-5 max-h-[calc(100vh-220px)] md:max-h-[calc(100vh-188px)] space-y-4">
             <div className="text-[13px] leading-relaxed text-[#46506b] bg-[#FBF6E9] border border-[#D8C9A0] rounded-xl p-3.5 shadow-sm">
-              <strong className="text-[#1B2A4A]">How to use:</strong> tap a stamp on the map, or pick a stop from the list below to fly straight to it. Tap the circle next to a name to mark it visited as you go.
+              <strong className="text-[#1B2A4A]">How to use:</strong> tap a
+              stamp on the map, or pick a stop from the list below to fly
+              straight to it. Tap the circle next to a name to mark it visited
+              as you go.
             </div>
 
-            <ProgressBar visitedCount={visited.size} totalCount={STOPS.length} />
+            <ProgressBar
+              visitedCount={visited.size}
+              totalCount={STOPS.length}
+            />
 
             <StopList
               stops={STOPS}
@@ -227,7 +231,7 @@ function App() {
           }`}
         >
           <div className="absolute inset-0 w-full h-full">
-            <LondonMap
+            <BernMap
               stops={STOPS}
               activeCategory={activeCategory}
               selectedStop={selectedStop}
@@ -241,7 +245,9 @@ function App() {
           <button
             onClick={() => setMobileView("map")}
             className={`flex items-center gap-1.5 px-4 py-2 rounded-full text-xs font-mono tracking-wider transition-all ${
-              mobileView === "map" ? "bg-[#F3ECD9] text-[#1B2A4A] font-bold" : "text-[#F3ECD9]/80"
+              mobileView === "map"
+                ? "bg-[#F3ECD9] text-[#1B2A4A] font-bold"
+                : "text-[#F3ECD9]/80"
             }`}
           >
             <MapIcon size={14} />
@@ -250,7 +256,9 @@ function App() {
           <button
             onClick={() => setMobileView("list")}
             className={`flex items-center gap-1.5 px-4 py-2 rounded-full text-xs font-mono tracking-wider transition-all ${
-              mobileView === "list" ? "bg-[#F3ECD9] text-[#1B2A4A] font-bold" : "text-[#F3ECD9]/80"
+              mobileView === "list"
+                ? "bg-[#F3ECD9] text-[#1B2A4A] font-bold"
+                : "text-[#F3ECD9]/80"
             }`}
           >
             <ListIcon size={14} />
@@ -273,7 +281,10 @@ function App() {
           </a>{" "}
           contributors
         </div>
-        <div>Stamps are hand-drawn vector illustrations · Built with React &amp; Tailwind</div>
+        <div>
+          Stamps are hand-drawn vector illustrations · Built with React &amp;
+          Tailwind
+        </div>
       </footer>
     </div>
   );

@@ -5,7 +5,7 @@ export interface Stop {
   id: string;
   name: string;
   area: string;
-  cat: "magic" | "lit" | "classic" | "gem";
+  cat: "history" | "nature" | "region" | "water" | "culture" | "viewpoint";
   lat: number;
   lng: number;
   glyph: string;
@@ -21,8 +21,14 @@ interface StopListProps {
   activeCategory: string;
 }
 
-const CAT_ORDER: Array<Stop["cat"]> = ["magic", "lit", "classic", "gem"];
-
+const CAT_ORDER: Array<Stop["cat"]> = [
+  "history",
+  "nature",
+  "region",
+  "water",
+  "culture",
+  "viewpoint",
+];
 export const StopList: React.FC<StopListProps> = ({
   stops,
   visited,

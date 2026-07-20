@@ -12,7 +12,7 @@ interface MapProps {
   onClearSelectedStop: () => void;
 }
 
-export const LondonMap: React.FC<MapProps> = ({
+export const BernMap: React.FC<MapProps> = ({
   stops,
   activeCategory,
   selectedStop,
@@ -20,7 +20,9 @@ export const LondonMap: React.FC<MapProps> = ({
 }) => {
   const mapContainerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<L.Map | null>(null);
-  const markersRef = useRef<globalThis.Map<string, L.Marker>>(new globalThis.Map());
+  const markersRef = useRef<globalThis.Map<string, L.Marker>>(
+    new globalThis.Map(),
+  );
 
   // Initialize Map
   useEffect(() => {
@@ -29,7 +31,7 @@ export const LondonMap: React.FC<MapProps> = ({
     // Create Leaflet map instance
     const mapInstance = L.map(mapContainerRef.current, {
       scrollWheelZoom: true,
-    }).setView([51.514, -0.108], 13);
+    }).setView([46.95421326794626, 7.4741547239042605], 13);
 
     L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
       attribution:
@@ -70,7 +72,7 @@ export const LondonMap: React.FC<MapProps> = ({
       const stampHtml = renderToString(
         <div style={{ transform: `rotate(${rotIcon}deg)` }}>
           <StampSvg cat={stop.cat} glyph={stop.glyph} size={40} />
-        </div>
+        </div>,
       );
 
       const icon = L.divIcon({
@@ -112,10 +114,12 @@ export const LondonMap: React.FC<MapProps> = ({
             </b>
             {stop.tip}
           </div>
-        </div>
+        </div>,
       );
 
-      const marker = L.marker([stop.lat, stop.lng], { icon }).addTo(mapInstance);
+      const marker = L.marker([stop.lat, stop.lng], { icon }).addTo(
+        mapInstance,
+      );
       marker.bindPopup(popupHtml);
 
       markersRef.current.set(stop.id, marker);
@@ -146,7 +150,11 @@ export const LondonMap: React.FC<MapProps> = ({
 
   return (
     <div className="relative w-full h-full min-h-[40vh] md:min-h-0 bg-[#e7ddc4]">
-      <div ref={mapContainerRef} className="w-full h-full" style={{ minHeight: "inherit" }} />
+      <div
+        ref={mapContainerRef}
+        className="w-full h-full"
+        style={{ minHeight: "inherit" }}
+      />
     </div>
   );
 };

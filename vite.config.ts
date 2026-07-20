@@ -15,7 +15,7 @@ export default defineConfig({
       manifest: {
         name: "Yevheniia's London Passport",
         short_name: "London Passport",
-        description: "A Self-Guided Walking & Wonder Map · 10 Days in London",
+        description: "A Self-Guided Walking & Wonder Map · Hidden gems in Bern",
         theme_color: "#F3ECD9",
         background_color: "#F3ECD9",
         display: "standalone",
